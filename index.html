@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+<html lang="en" data-menu-color="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Procker Planning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
+
+    <!-- App css -->
+    <link href="assets/css/app-saas.min.css" rel="stylesheet" type="text/css" id="app-style" />
+
+    <!-- Icons css -->
+    <link href="assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+
+    <style type="text/css">
+        .btn-card {
+            width: 100%;
+            max-height: 250px;
+            font-size: 2.5rem;
+            aspect-ratio: 1/1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+        </symbol>
+        <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+        </symbol>
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </symbol>
+        <symbol id="clipboard" viewBox="0 0 16 16">
+            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"></path>
+            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"></path>
+        </symbol>
+    </svg>
+
+    <!-- Begin page -->
+    <div class="wrapper" id = "pocker-app">
+
+        
+        <!-- ========== Topbar Start ========== -->
+        <div class="navbar-custom">
+            <div class="topbar container-fluid">
+                <div class="d-flex align-items-center gap-lg-2 gap-1">
+
+                    <!-- Topbar Brand Logo -->
+                    <div class="logo-topbar">
+                        <!-- Logo light -->
+<!--                         <a class="logo-light">
+                            <span class="logo-lg">
+                                <img src="assets/images/logo.png" alt="logo">
+                            </span>
+                            <span class="logo-sm">
+                                <img src="assets/images/logo-sm.png" alt="small logo">
+                            </span>
+                        </a> -->
+
+                        <!-- Logo Dark -->
+<!--                         <a class="logo-dark">
+                            <span class="logo-lg">
+                                <img src="assets/images/logo-dark.png" alt="dark logo">
+                            </span>
+                            <span class="logo-sm">
+                                <img src="assets/images/logo-dark-sm.png" alt="small logo">
+                            </span>
+                        </a> -->
+                    </div>
+
+
+                    <div class="dropdown d-none d-lg-block">
+                        <div class="input-group">
+                            <input type="text" class="form-control dropdown-toggle" id="name-input" v-model="name">
+                            <button class="input-group-text btn btn-primary" type="submit" v-on:click="setName">Set Name</button>
+                        </div>
+                    </div>
+
+                    <div v-if="master">
+                        <div class="input-group">
+                            <div type="text" class="form-control" id = "url-text">{{url}}</div>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-title="Copied to clipboard" data-bs-trigger="focus"onclick="copyUrlToClipboard(event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                                    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"></path>
+                                    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"></path>
+                                </svg>
+                                <span class="visually-hidden">Button</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="topbar-menu d-flex align-items-center gap-3">
+                    <li class="d-none d-sm-inline-block">
+                        <div class="nav-link" id="light-dark-mode" data-bs-toggle="tooltip" data-bs-placement="left" title="Theme Mode">
+                            <i class="ri-moon-line font-22"></i>
+                        </div>
+                    </li>
+
+
+                    <li class="d-none d-md-inline-block">
+                        <div class="nav-link" data-toggle="fullscreen">
+                            <i class="ri-fullscreen-line font-22"></i>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- ========== Topbar End ========== -->
+
+        <!-- ========== Left Sidebar Start ========== -->
+        <div class="leftside-menu">
+
+            <!-- Brand Logo Light -->
+<!--             <a href="index.html" class="logo logo-light">
+                <span class="logo-lg">
+                    <img src="assets/images/logo.png" alt="logo">
+                </span>
+                <span class="logo-sm">
+                    <img src="assets/images/logo-sm.png" alt="small logo">
+                </span>
+            </a> -->
+
+            <!-- Brand Logo Dark -->
+<!--             <a href="index.html" class="logo logo-dark">
+                <span class="logo-lg">
+                    <img src="assets/images/logo-dark.png" alt="dark logo">
+                </span>
+                <span class="logo-sm">
+                    <img src="assets/images/logo-dark-sm.png" alt="small logo">
+                </span>
+            </a> -->
+
+            <!-- Sidebar -->
+            <div class="h-100" id="leftside-menu-container" data-simplebar>
+
+                <!--- Sidemenu -->
+                <ul class="side-nav">
+
+                    <li class="side-nav-title">Players</li>
+
+                    <li v-for="player in players" class="side-nav-item">
+                        <span class="side-nav-link">
+                            <!-- <i class="uil-calender"></i> -->
+                            <span v-if="state === 'voting' && player.vote == null" class="spinner-border text-warning spinner-border-sm me-2 float-end">
+                            </span>
+                            <svg v-if="state === 'voting' && player.vote != null" class="bi flex-shrink-0 me-2 text-success float-end" width="16" height="16" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                            <span> {{player.name}} </span>
+                        </span>
+                    </li>
+
+                </ul>
+                <!--- End Sidemenu -->
+
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <!-- ========== Left Sidebar End ========== -->
+
+        <!-- ============================================================== -->
+        <!-- Start Page Content Here -->
+        <!-- ============================================================== -->
+
+        <div class="content-page">
+            <div class="content">
+
+                <!-- Start Content-->
+                <div class="container-fluid">
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="page-title-box">
+                                <div class="page-title-left mt-3">
+                                    <div class="input-group" v-if="master && state === 'idle'">
+                                        <input type="text" class="form-control form-control-light" id="dash-daterange" v-model="ticketDescription">
+                                        <button class="input-group-text btn btn-primary" type="submit" v-on:click="startVoting">Vote</button>
+                                    </div>
+
+                                    <div class="input-group" v-if="state === 'voting' || state == 'results'">
+                                        <div class="form-control">{{ticketDescription}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============================================================== -->
+                    <!-- Voting Panel                                                   -->
+                    <!-- ============================================================== -->
+                    <div class="row mt-2" v-if="state === 'voting'">
+                        <div class="col-2" v-for="i in 6">
+                            <button type="button" class="btn btn-card btn-outline-secondary" :class="{active: vote == i  - 1}" v-on:click="castVote(i - 1)">{{label(i - 1)}}</input>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2" v-if="state === 'voting'">
+                        <div class="col-2" v-for="i in 6">
+                            <button type="button" class="btn btn-card btn-outline-secondary" :class="{active: vote == i  + 5}" v-on:click="castVote(i + 5)">{{label(i + 5)}}</input>
+                        </div>
+                    </div>
+
+                    <div v-if="master && state === 'voting'" class="d-flex flex-column justify-content-center align-items-center mt-3">
+                        <button class="btn btn-primary" v-on:click="showResults()">Show Results</button>
+                    </div>
+                    <!-- ============================================================== -->
+
+
+                    <!-- ============================================================== -->
+                    <!-- Results Panel                                                  -->
+                    <!-- ============================================================== -->
+                    <div class="row mt-2" v-if="state === 'results'">
+                        <div class="col-2" v-for="player in players.filter((p) => p.vote != null)">
+                            <span>{{player.name}}: {{label(player.vote)}}</span>
+                        </div>
+                    </div>
+
+                    <div v-if="master && state === 'results'" class="d-flex flex-column justify-content-center align-items-center mt-3">
+                        <button class="btn btn-primary" v-on:click="reset()">Start New Voting</button>
+                    </div>
+                    <!-- ============================================================== -->
+
+                </div>
+                <!-- container -->
+
+            </div>
+            <!-- content -->
+
+        </div>
+        <!-- ============================================================== -->
+        <!-- End Page content -->
+        <!-- ============================================================== -->
+
+    </div>
+    <!-- END wrapper -->
+
+    <script src="https://unpkg.com/peerjs@1.5.0/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script src="assets/js/events.js"></script>
+    <script src="assets/js/peer-master.js"></script>
+    <script src="assets/js/peer-client.js"></script>
+
+    <script type="text/javascript">
+
+        function getQueryVariable(variable) {
+            const query = window.location.search.substring(1);
+            const vars = query.split("&");
+            for (var i=0;i<vars.length;i++) {
+                var pair = vars[i].split("=");
+                if (pair[0] == variable) {
+                    return pair[1];
+                }
+            } 
+            return null;
+        }
+
+        const sid = getQueryVariable("sid");
+        const master = sid ===  null;
+        
+        const adjective = ["Excited", "Anxious", "Overweight", "Demonic", "Jumpy", "Misunderstood", "Squashed", "Gargantuan","Broad", "Crooked", "Curved", "Deep", "Even","Excited", "Anxious", "Overweight", "Demonic", "Jumpy", "Misunderstood", "Squashed", "Gargantuan","Broad", "Crooked", "Curved", "Deep", "Even", "Flat", "Hilly", "Jagged", "Round", "Shallow", "Square", "Steep", "Straight", "Thick", "Thin", "Cooing", "Deafening", "Faint", "Harsh", "High-pitched", "Hissing", "Hushed", "Husky", "Loud", "Melodic", "Moaning", "Mute", "Noisy", "Purring", "Quiet", "Raspy", "Screeching", "Shrill", "Silent", "Soft", "Squeaky", "Squealing", "Thundering", "Voiceless", "Whispering"] 
+        const object = ["Taco", "Operating System", "Sphere", "Watermelon", "Cheeseburger", "Apple Pie", "Spider", "Dragon", "Remote Control", "Soda", "Barbie Doll", "Watch", "Purple Pen", "Dollar Bill", "Stuffed Animal", "Hair Clip", "Sunglasses", "T-shirt", "Purse", "Towel", "Hat", "Camera", "Hand Sanitizer Bottle", "Photo", "Dog Bone", "Hair Brush", "Birthday Card"]
+
+        const name =  adjective[Math.floor(Math.random() * adjective.length)] + " " + object[Math.floor(Math.random() * object.length)];
+
+
+        const peer = master ? new PeerMaster(name) : new PeerClient(name, sid);
+
+        peer.on('start', () => {
+            data.url = `${window.location.href}${window.location.href.includes('?') ? '' : '?'}sid=${peer.getId()}`;
+            if (master) {
+                data.players.push({
+                    name,
+                    id: peer.getId()
+                });
+            }
+        });
+        peer.on('session', (session) => {
+            data.players.push(...session.players);
+            data.state = session.state;
+            data.ticketDescription = session.description;
+        });
+        peer.on('player-joined', (player) => data.players.push({id : player.id, name: player.name, vote: null}));
+        peer.on('player-name-changed', (player) => data.players.find((p) => player.id === p.id).name = player.name);
+        peer.on('player-left', (player) => {
+            const index = data.players.findIndex((p) => p.id === player.id);
+            if (index >= 0) {
+                data.players.splice(index, 1);
+            }
+        });
+        peer.on('start-voting', (description) => {
+            data.state = 'voting';
+            data.players.forEach((p) => p.vote = null);
+            data.ticketDescription = description;
+        });
+        peer.on('cast-vote', (player) => data.players.find((p) => player.id === p.id).vote = player.vote);
+        peer.on('show-results', () => data.state = 'results');
+        peer.on('reset', () => {
+            data.vote = null;
+            data.state = 'idle';
+            data.ticketDescription = '';
+        });
+
+        const labels = ['0', '1/2', '1', '2',  '3', '5', '8', '13', '20', '40', '100', '?']
+
+        const data = Vue.reactive({
+            name, 
+            master,
+            url: '',
+            ticketDescription: '',
+            state: 'idle',
+            players: [],
+            vote: null
+        });
+
+        const app = Vue.createApp({
+            data() {
+                return data;
+            },
+            methods: {
+                label(idx) {
+                    return labels[idx];
+                },
+                setName() {
+                    peer.setName(data.name);
+                },
+                startVoting() {
+                    if (master && data.ticketDescription.length && data.state === 'idle') {
+                        peer.startVoting(data.ticketDescription);
+                        data.state = 'voting';
+                        data.players.forEach((p) => p.vote = null);
+                    }
+                },
+                castVote(v) {
+                    data.vote = v;
+                    if (master)  {
+                        data.players[0].vote  = v;
+                    }
+                    peer.castVote(v);
+                },
+                showResults() {
+                    data.state = 'results';
+                    if (master) {
+                        peer.showResults();
+                    }
+                },
+                reset() {
+                    data.vote = null;
+                    data.state = 'idle';
+                    data.ticketDescription = '';
+                    if (master) {
+                        peer.reset();
+                    }
+                }
+            }
+        });
+        app.mount('#pocker-app');
+
+    </script>
+
+    <script type="text/javascript">
+        const config = {
+            theme: "light",
+            nav: "vertical",
+            layout: {
+                mode: "fluid",
+                position: "fixed"
+            },
+            topbar: {
+                color: "light"
+            },
+            menu: {
+                color: "dark"
+            },
+            sidenav: {
+                size: "default",
+                user: false
+            }
+        };
+
+        window.config = config;
+        window.defaultConfig = config;
+
+        function copyUrlToClipboard(event) {
+            navigator.clipboard.writeText(document.getElementById("url-text").innerText);
+        }
+    </script>
+
+    <script src="assets/js/vendor.min.js"></script>
+    <script src="assets/js/app.min.js"></script>
+</body>
+
+</html>
