@@ -215,14 +215,19 @@
                     <!-- ============================================================== -->
                     <!-- Results Panel                                                  -->
                     <!-- ============================================================== -->
-                    <div class="row mt-2" v-if="state === 'results'">
-                        <div class="col-2" v-for="player in players.filter((p) => p.vote != null)">
-                            <span>{{player.name}}: {{label(player.vote)}}</span>
-                        </div>
+                    <div v-if="hasVotes && state === 'results'" class="d-flex flex-column justify-content-center align-items-center mt-3">
+                        <apexchart type="pie" width="480" :options="chartOptions" :series="series"></apexchart>
+                    </div>
+
+                    <div v-if="!hasVotes && state === 'results'" class="d-flex flex-column justify-content-center align-items-center mt-3">
+                        <p>No votes submited!</p>
                     </div>
 
                     <div v-if="master && state === 'results'" class="d-flex flex-column justify-content-center align-items-center mt-3">
-                        <button class="btn btn-primary" v-on:click="reset()">Start New Voting</button>
+                        <div class="mt-2">
+                            <button class="btn btn-secondary" v-on:click="startVoting()">Vote Again</button>
+                            <button class="btn btn-primary ms-3" v-on:click="reset()">Start New Voting</button>
+                        </div>
                     </div>
                     <!-- ============================================================== -->
 
@@ -242,6 +247,9 @@
 
     <script src="https://unpkg.com/peerjs@1.5.0/dist/peerjs.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script src="assets/js/vue3-apexcharts.js"></script>
 
     <script src="assets/js/events.js"></script>
     <script src="assets/js/peer-master.js"></script>
@@ -295,19 +303,22 @@
             }
         });
         peer.on('start-voting', (description) => {
+            data.vote = null;
             data.state = 'voting';
             data.players.forEach((p) => p.vote = null);
             data.ticketDescription = description;
         });
         peer.on('cast-vote', (player) => data.players.find((p) => player.id === p.id).vote = player.vote);
-        peer.on('show-results', () => data.state = 'results');
+        peer.on('show-results', () => prepareResults());
         peer.on('reset', () => {
             data.vote = null;
             data.state = 'idle';
             data.ticketDescription = '';
         });
 
-        const labels = ['0', '1/2', '1', '2',  '3', '5', '8', '13', '20', '40', '100', '?']
+        const labels = ['0', '1/2', '1', '2',  '3', '5', '8', '13', '20', '40', '100', '?'];
+
+        let summaryAgr = [];
 
         const data = Vue.reactive({
             name, 
@@ -316,12 +327,47 @@
             ticketDescription: '',
             state: 'idle',
             players: [],
-            vote: null
+            vote: null,
+            agr: [],
+            series: [],
+            hasVotes:  false,
+            chartOptions: {
+                chart: {
+                    width: 380,
+                    type: 'pie',
+                },
+                tooltip: {
+                    custom: ({series, seriesIndex, dataPointIndex, w}) => {
+                        let tooltip = '<ul class="list-group">';
+                        tooltip += '<li class="list-group-item list-group-item-dark">' + data.chartOptions.labels[seriesIndex] + '</li>'; 
+                        summaryAgr[seriesIndex]
+                            .forEach((p) => tooltip += ('<li class="list-group-item">' + p.name + '</li>'));
+                        tooltip += '</ul>'
+                        return tooltip;
+                    },
+                    theme: 'light',
+                },
+                labels: labels,
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 240
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            },
         });
 
         const app = Vue.createApp({
             data() {
                 return data;
+            },
+            components: {
+                apexchart: VueApexCharts,
             },
             methods: {
                 label(idx) {
@@ -331,7 +377,8 @@
                     peer.setName(data.name);
                 },
                 startVoting() {
-                    if (master && data.ticketDescription.length && data.state === 'idle') {
+                    data.vote = null;
+                    if (master && data.ticketDescription.length && (data.state === 'idle' || data.state == 'results')) {
                         peer.startVoting(data.ticketDescription);
                         data.state = 'voting';
                         data.players.forEach((p) => p.vote = null);
@@ -345,7 +392,7 @@
                     peer.castVote(v);
                 },
                 showResults() {
-                    data.state = 'results';
+                    prepareResults();
                     if (master) {
                         peer.showResults();
                     }
@@ -362,6 +409,34 @@
         });
         app.mount('#pocker-app');
 
+        function prepareResults() {
+            data.series = [];
+            data.chartOptions.labels = [];
+            summaryAgr = [];
+        
+            const agr = Array(labels.length);
+            const votes = Array(labels.length).fill(0);
+
+            data.players
+                .filter((p) =>  p.vote !== null)
+                .forEach((p) => {
+                    ++votes[p.vote]
+                    if (!agr[p.vote])  {
+                        agr[p.vote] = [];
+                    }
+                    agr[p.vote].push(p);
+                });
+
+            for (let i = 0; i <  votes.length; ++i) {
+                if (votes[i]) {
+                    data.series.push(votes[i]);
+                    data.chartOptions.labels.push(labels[i] + ' day(s) - ' + votes[i] + ' vote(s)');
+                    summaryAgr.push(agr[i]);
+                }
+            }
+            data.hasVotes = data.series.length > 0;
+            data.state = 'results';
+        };
     </script>
 
     <script type="text/javascript">
