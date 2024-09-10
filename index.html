@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8"/>
-    <title>Pocker Planning</title>
+    <title>Poker Planning</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- App favicon -->
@@ -21,6 +21,11 @@
             max-height: 250px;
             font-size: 2.5rem;
             aspect-ratio: 1/1.5;
+        }
+        .results-list {
+            overflow: auto !important;
+            display: block;
+            max-height: 480px;
         }
     </style>
 </head>
@@ -228,14 +233,27 @@
                 <!-- ============================================================== -->
                 <!-- Results Panel                                                  -->
                 <!-- ============================================================== -->
-                <div v-if="hasVotes && state === 'results'"
-                     class="d-flex flex-column justify-content-center align-items-center mt-3">
-                    <apexchart type="pie" width="480" :options="chartOptions" :series="series"></apexchart>
-                </div>
+                <div v-if="state === 'results'" class="row">
 
-                <div v-if="!hasVotes && state === 'results'"
-                     class="d-flex flex-column justify-content-center align-items-center mt-3">
-                    <p>No votes submited!</p>
+                    <div class="col-3 mt-3">
+                        <ul class="list-group results-list">
+                            <li v-for="player in players.filter((p) => p.vote !== null)" class="list-group-item">
+                                {{player.name}}: {{label(player.vote)  + ' day(s)'}}
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-9">
+                        <div v-if="hasVotes"
+                             class="d-flex flex-column justify-content-center align-items-center mt-3">
+                            <apexchart type="pie" width="480" :options="chartOptions" :series="series"></apexchart>
+                        </div>
+
+                        <div v-if="!hasVotes"
+                             class="d-flex flex-column justify-content-center align-items-center mt-3">
+                            <p>No votes submitted!</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div v-if="master && state === 'results'"
