@@ -4,7 +4,10 @@ function PeerMaster(name) {
     this.on = (event, callback) => eventEmitter.on(event, callback);
 
     const peer = new Peer(null, {
-        debug: 2
+        debug: 2,
+        config: {'iceServers': [
+            { url: 'stun:stun.l.google.com:19302' }
+        ]}
     });
     const clients = [];
 
